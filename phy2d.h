@@ -44,20 +44,39 @@ void Phy2D_CreateDisk(Phy2D_DiskBody *disk, float radius, float mass, float rest
 void Phy2D_CreateSphere(Phy2D_DiskBody *disk, float radius, float mass, float restitution);
 
 
+// Polygon rigid body.
+typedef struct 
+{
+    Phy2D_Body body;
+    size_t size;
+    size_t _index;
+    Phy2D_Vec2f *points;
+    Phy2D_Vec2f *transf_points;
+} Phy2D_PolyBody;
+
+void Phy2D_CreatePoly(Phy2D_PolyBody *poly, size_t size, float mass, float restitution);
+void Phy2D_AddPolyPoint(Phy2D_PolyBody *poly, float x, float y);
+void Phy2D_GetTransformedPoints(Phy2D_PolyBody *poly);
+void Phy2D_FreePoly(Phy2D_PolyBody *poly);
+
+
 // State of the system.
 typedef struct
 {   
     size_t disk_array_capacity;
     size_t disk_array_size;
     Phy2D_DiskBody *disk_array;
-
-    float static_friction;
-    float dynamic_friction;
+    
+    size_t poly_array_capacity;
+    size_t poly_array_size;
+    Phy2D_PolyBody *poly_array;
 } Phy2D_State;
 
-void Phy2D_CreateState(Phy2D_State *state, size_t disk_array_capacity);
-void Phy2D_SetFriction(Phy2D_State *state, float static_friction, float dynamic_friction);
+void Phy2D_CreateState(Phy2D_State *state, size_t disk_array_capacity, size_t poly_array_capacity);
 void Phy2D_AddDiskBody(Phy2D_State *state, float radius, float mass, float restitution);
+void Phy2D_AddPolyBody(Phy2D_State *state, size_t size, float mass, float restitution);
+Phy2D_DiskBody* Phy2D_GetDiskBody(Phy2D_State *state, size_t i);
+Phy2D_PolyBody* Phy2D_GetPolyBody(Phy2D_State *state, size_t i);
 void Phy2D_UpdateState(Phy2D_State *state, float dt);
 void Phy2D_FreeState(Phy2D_State *state);
 

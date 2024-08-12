@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <raylib.h>
 #include <time.h>
-#include "phys2d.h"
+
+#include "phy2d.h"
 
 
 int main(void)
@@ -23,8 +24,7 @@ int main(void)
     size_t balls = 100;
     
     Phy2D_State state;
-    Phy2D_CreateState(&state, balls);
-    Phy2D_SetFriction(&state, 0.0f, 2.5f);
+    Phy2D_CreateState(&state, balls, 1);
         
     Color colors[balls];
     
@@ -32,8 +32,19 @@ int main(void)
     {
         colors[i] = RED;
         Phy2D_AddDiskBody(&state, radius, 1.0f, 1.0f);    
-        Phy2D_SetPosition(&state.disk_array[i].body, ((float)rand() / RAND_MAX) * width, ((float)rand() / RAND_MAX) * height);
+        Phy2D_SetPosition(&Phy2D_GetDiskBody(&state, i)->body, ((float)rand() / RAND_MAX) * width, ((float)rand() / RAND_MAX) * height);
     }
+
+    Phy2D_AddPolyBody(&state, 4, 1.0f, 1.0f);
+    
+    Phy2D_PolyBody *b = Phy2D_GetPolyBody(&state, 0);
+    Phy2D_AddPolyPoint(b, -10.0f, 5.0f);
+    Phy2D_AddPolyPoint(b,  10.0f, 5.0f);
+    Phy2D_AddPolyPoint(b,  10.0f, -5.0f);
+    Phy2D_AddPolyPoint(b, -10.0f, -5.0f);
+    
+    Phy2D_SetPosition(&b->body, 200, 200);
+    Phy2D_SetAngularVelocity(&b->body, 1.0f);
 
     colors[0] = YELLOW;
 
@@ -84,6 +95,24 @@ int main(void)
 
             DrawLineV(line_s, line_e, BLUE);
         }
+
+        Phy2D_PolyBody *pb = Phy2D_GetPolyBody(&state, 0);
+        Phy2D_GetTransformedPoints(pb);
+        Vector2 points[6];
+        
+        points[0].x = pb->body.position.x;
+        points[0].y = pb->body.position.y;
+
+        for (size_t i=1; i < 5; i++)
+        {
+            points[i].x = pb->transf_points[i-1].x;
+            points[i].y = pb->transf_points[i-1].y;
+        }
+        
+        points[5].x = pb->transf_points[0].x;
+        points[5].y = pb->transf_points[0].y;
+
+        DrawTriangleFan(points, 6, BLUE);
 
         EndDrawing();
     }
